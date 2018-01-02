@@ -33,96 +33,41 @@ public class TestGraphGHTPONTraffic {
 	private int verboseLevel = 0;
 
 	public TestGraphGHTPONTraffic(int numOfThreads) {
-		testingDates = new String[] { "2014-03-01", "2014-03-02", "2014-03-03", "2014-03-04", "2014-03-05",
-				"2014-03-06", };
+		testingDates = new String[] {"2014-03-01"};
 		this.numOfThreads = numOfThreads;
 		run();
 	}
 
 	private void run() {
-
 		String[] subFolders = new String[testingDates.length];
 		for (int i = 0; i < testingDates.length; i++) {
 			subFolders[i] = Constants.TrafficDataFolder + testingDates[i];
 		}
 		for (int i = 0; i < testingDates.length; i++) {
-
 			File[] allFilesInSubFolder = new File(subFolders[i]).listFiles();
+			//used for parallelism 
 			final CountDownLatch latch = new CountDownLatch(allFilesInSubFolder.length);
 			ExecutorService pool = Executors.newFixedThreadPool(numOfThreads);
 			for (final File apdmFile : allFilesInSubFolder) {
-
 				final APDMInputFormat apdm = new APDMInputFormat(apdmFile);
 				final int graphSize = apdm.data.numNodes;
 				final ArrayList<Integer[]> edges = apdm.data.intEdges;
 				final ArrayList<Double> edgeCosts = apdm.data.identityEdgeCosts;
-
+				
 				pool.execute(new Thread() {
 					public void run() {
-
-						System.out.println("processing : " + apdmFile.getName() + " funcID: " + FuncType.EMS);
-						long startTime = System.nanoTime();
-						Function func = null;
-						double[] b = new double[apdm.data.numNodes];
-						double[] PValue = apdm.data.PValue;
-						int[] trueSubGraph = apdm.data.trueSubGraphNodes;
-
-						double[] logC = new double[apdm.data.numNodes];
-						for (int i = 0; i < apdm.data.numNodes; i++) {
-							logC[i] = -Math.log(PValue[i] / 0.15D);
-						}
-						double mean = new Stat(logC).mean();
-						double std = new Stat(logC).std();
-						for (int i = 0; i < apdm.data.numNodes; i++) {
-							if(std != 0.0D){
-								logC[i] = (logC[i] - mean) / std;	
+						//System.out.println(apdm.data.numNodes);
+						//System.out.println(apdm.data.numEdges);
+						//System.out.println(apdm.data.graphWeightedAdjList.get(0).size());
+						
+						for(int i=0;i<apdm.data.graphWeightedAdj.length;i++){
+							for(int j=0;j<4;j++){
+								System.out.printf("%f ",apdm.data.graphWeightedAdj[i][j]);
 							}
+							System.out.println();
 						}
-						Arrays.fill(b, 1.0D);
-						func = ScoreFuncFactory.getFunc(FuncType.EMS, b, logC);
-						double bestFuncValue = -Double.MAX_VALUE;
-						double[] bestFuncs = null;
-						GraphGHTP bestGraphGHTP = null;
-						for (int s = 50; s <= 1000; s += 50) {
-							int g = 1;
-							double B = s - 1 + 0.0D;
-							boolean isInitialSingle = false;
-							GraphGHTP graphGHTP = new GraphGHTP(graphSize, edges, edgeCosts, logC, s, g, B,
-									isInitialSingle, trueSubGraph, func, true, 1.0D);
-							if (bestFuncValue < graphGHTP.funcValueTail) {
-								bestFuncValue = graphGHTP.funcValueTail;
-								bestGraphGHTP = graphGHTP;
-								bestFuncs = ArrayUtils.add(bestFuncs, bestFuncValue);
-							}
-							if (verboseLevel == 0) {
-								System.out.println("processing s: " + s + " ; score: " + graphGHTP.funcValueTail);
-							}
-						}
-						try {
-							double runTime = (System.nanoTime() - startTime) / 1e9D;
-							double funcVal = bestGraphGHTP.funcValueTail;
-							int numOfNodes = bestGraphGHTP.resultNodesTail.size();
-							int numOfNodesP = 0;
-							int numOfNOdesLargerThan0 = 0;
-							for (int node : bestGraphGHTP.resultNodesTail) {
-								if (PValue[node] <= 0.15D) {
-									numOfNodesP++;
-								}
-								if (logC[node] > 0.0D) {
-									numOfNOdesLargerThan0++;
-								}
-							}
-							FileWriter fileWriter = new FileWriter(new File(resultFileName), true);
-							fileWriter.write(apdmFile.getName() + "," + FuncType.EMS + "," + funcVal + "," + runTime
-									+ ",0.0,0.0,0.0,0.0 0.0," + numOfNodes + "," + numOfNodesP + ","
-									+ numOfNOdesLargerThan0 + "\n");
-							fileWriter.close();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						latch.countDown();
+						
 					}
-
 				});
 			}
 			try {
@@ -134,12 +79,10 @@ public class TestGraphGHTPONTraffic {
 		}
 	}
 
-	public static void main(String args[]) {
-		
+	public static void main(String args[]) {		
 		Constants.intializeProject();
-
 		if (args == null || args.length == 0) {
-			int numOfThreads = 3;
+			int numOfThreads = 1;
 			new TestGraphGHTPONTraffic(numOfThreads);
 		} else {
 			int numOfThreads = Integer.parseInt(args[0]);
