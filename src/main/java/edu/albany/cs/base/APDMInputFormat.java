@@ -272,7 +272,7 @@ public class APDMInputFormat {
 
 	/**
 	 * @param APDMFile
-	 *            read APDM from file
+	 * read APDM from file as an object
 	 */
 	private boolean readAPDMFile(File APDMFile) {
 		BufferedReader br = null;

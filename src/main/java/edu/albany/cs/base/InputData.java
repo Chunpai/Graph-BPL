@@ -42,6 +42,7 @@ public class InputData {
     public double[] averCounts;
     // for transportation data
     public double[] speed;
+    public double[] refSpeed;
     public double[] meanSpeed;
     public double[] speedStd;
     // for disease outbreak data

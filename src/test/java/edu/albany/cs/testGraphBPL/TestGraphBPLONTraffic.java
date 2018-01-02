@@ -1,4 +1,4 @@
-package edu.albany.cs.testGraphGHTP;
+package edu.albany.cs.testGraphBPL;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -19,7 +19,7 @@ import edu.albany.cs.scoreFuncs.FuncType;
 import edu.albany.cs.scoreFuncs.Function;
 import edu.albany.cs.scoreFuncs.ScoreFuncFactory;
 
-public class TestGraphGHTPONTraffic {
+public class TestGraphBPLONTraffic {
 	private final int numOfThreads;
 
 	private final String resultFileName = Constants.TrafficOutputFolder + "graph_GHTP_Traffic_Result.txt";
@@ -32,7 +32,7 @@ public class TestGraphGHTPONTraffic {
 
 	private int verboseLevel = 0;
 
-	public TestGraphGHTPONTraffic(int numOfThreads) {
+	public TestGraphBPLONTraffic(int numOfThreads) {
 		testingDates = new String[] {"2014-03-01"};
 		this.numOfThreads = numOfThreads;
 		run();
@@ -52,6 +52,7 @@ public class TestGraphGHTPONTraffic {
 				final APDMInputFormat apdm = new APDMInputFormat(apdmFile);
 				final int graphSize = apdm.data.numNodes;
 				final ArrayList<Integer[]> edges = apdm.data.intEdges;
+				final double[] speeds = apdm.data.speed;
 				final ArrayList<Double> edgeCosts = apdm.data.identityEdgeCosts;
 				
 				pool.execute(new Thread() {
@@ -60,13 +61,7 @@ public class TestGraphGHTPONTraffic {
 						//System.out.println(apdm.data.numEdges);
 						//System.out.println(apdm.data.graphWeightedAdjList.get(0).size());
 						
-						for(int i=0;i<apdm.data.graphWeightedAdj.length;i++){
-							for(int j=0;j<4;j++){
-								System.out.printf("%f ",apdm.data.graphWeightedAdj[i][j]);
-							}
-							System.out.println();
-						}
-						
+						System.out.println(edges.size());
 					}
 				});
 			}
@@ -83,10 +78,10 @@ public class TestGraphGHTPONTraffic {
 		Constants.intializeProject();
 		if (args == null || args.length == 0) {
 			int numOfThreads = 1;
-			new TestGraphGHTPONTraffic(numOfThreads);
+			new TestGraphBPLONTraffic(numOfThreads);
 		} else {
 			int numOfThreads = Integer.parseInt(args[0]);
-			new TestGraphGHTPONTraffic(numOfThreads);
+			new TestGraphBPLONTraffic(numOfThreads);
 		}
 	}
 
